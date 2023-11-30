@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "conflict-registry-details-client-side-solution",
+    "id": "4d11acc4-ac9b-4e4c-8a0e-0b60afc7656b",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.16.1"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "ConflictRegistryDetails description"
+      },
+      "longDescription": {
+        "default": "ConflictRegistryDetails description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "conflict-registry-details Feature",
+        "description": "The feature that activates elements of the conflict-registry-details solution.",
+        "id": "7ccf09fa-a19e-496e-a91a-f94cce91050a",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/conflict-registry-details.sppkg"
+  }
+}
