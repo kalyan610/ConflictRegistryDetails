@@ -9,9 +9,15 @@ import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/People
 
 import {Icon} from 'office-ui-fabric-react/lib/Icon';
 
+import {PrimaryButton } from 'office-ui-fabric-react/lib/Button';
+
 import Service from './Service1';
 
 const stackTokens = { childrenGap: 20 };
+
+const stackButtonStyles: Partial<IStackStyles> = { root: { width: 10 } };
+
+
 const stackStyles: Partial<IStackStyles> = { root: { padding: 10} };
 const COIdrpYesorNo:IDropdownOption[]=[  { key: "Yes", text: "Yes"},  { key: "No", text: "No" }];  
 
@@ -21,12 +27,24 @@ const drpQualitative:IDropdownOption[]=[  { key: "Yes", text: "Yes"},  { key: "N
 
 const drpRiskTeamReview:IDropdownOption[]=[  { key: "Accept", text: "Accept"},  { key: "Mitigate", text: "Mitigate" },{ key: "Not a Conflict", text: "Not a Conflict" },{ key: "Reject", text: "Reject" } ];  
 
+const drpHrEmployeeStatus:IDropdownOption[]=[  { key: "Candidate was on-boarded", text: "Candidate was on-boarded"},  { key: "Candidate not on-boarded", text: "Candidate not on-boarded" },{ key: "Current Employee", text: "Current Employee" } ]; 
+
+const drpHrReview:IDropdownOption[]=[  { key: "Accept", text: "Accept"},  { key: "Mitigate", text: "Mitigate" } ]; 
+
+const drpFollowupActions:IDropdownOption[]=[  { key: "Yes", text: "Yes"},  { key: "No", text: "No" }];  
+
 const dropdownStyles: Partial<IDropdownStyles> = {
   dropdown: { width: 350 },
 };
 
+const HrdropdownStyles: Partial<IDropdownStyles> = {
+  dropdown: { width: 250 },
+};
+
 
 let ReviewerName='';
+
+let HRSign='';
 
 let itemId='';
 
@@ -75,6 +93,22 @@ export interface IConflictRegistrationDetails
   disableFileUpload:boolean;
   QualitativeRisk:any;
   QuantativeRisk:any;
+
+  RiskTeamStatus:any;
+  RiskReviewverExsits:boolean;
+  AttachmentFiles:any;
+  RiskReviewervalue:any;
+  HRExsits:boolean;
+
+  //HR
+  HREmployeeStatus:any;
+  HRApprovalStatus:any;
+  HRReview:any;
+  MitigateComments:any;
+  FollowupActions:any;
+  FollowupComments:any;
+  HRSignId:any;
+  //End
 
 }
 
@@ -145,7 +179,20 @@ export default class ConflictRegistryDetails extends React.Component<IConflictRe
       FileValue:[],
       disableFileUpload:false,
       QualitativeRisk:"",
-      QuantativeRisk:""
+      QuantativeRisk:"",
+      RiskTeamStatus:"",
+      RiskReviewverExsits:false,
+      AttachmentFiles:[],
+      RiskReviewervalue:"",
+      HRExsits:false,
+      HREmployeeStatus:"",
+      HRApprovalStatus:"",
+      HRReview:"",
+      MitigateComments:"",
+      FollowupActions:"",
+      FollowupComments:"",
+      HRSignId:[]
+
 
     };
 
@@ -176,6 +223,9 @@ export default class ConflictRegistryDetails extends React.Component<IConflictRe
 
 public async GetData()
 {
+
+  this.getReviewersGrouporNot();
+  this.getHRGrouporNot();
 
   if(itemId!="")
   {
@@ -238,6 +288,26 @@ public async GetMyRecords()
 
   //End
 
+  //Riskteam
+
+  this.setState({RiskTeamStatus:ItemInfo1.ReviewerStatus});
+  this.setState({RiskTeam:ItemInfo1.RiskTeamReview});
+  //ReviewPending
+  this.setState({QualitativeRisk:ItemInfo1.QualitativeRisk});
+  this.setState({QuantativeRisk:ItemInfo1.QuantativeRisk});
+  this.setState({ReviewerComments:ItemInfo1.ReviewerComments});
+  this.setState({hrrequired:ItemInfo1.DoesItRequiresHRApproval});
+  this.setState({AttachmentFiles:ItemInfo1.AttachmentFiles});
+  this.setState({RiskReviewervalue:ItemInfo1.RiskTeamReviewer.EMail});
+
+
+  //END
+
+  //HR
+
+  this.setState({HRApprovalStatus:ItemInfo1.HRStatus});
+  //END
+
 }
 
 private handleRiskTeam(event: React.FormEvent<HTMLDivElement>, item: IDropdownOption): void {
@@ -247,17 +317,38 @@ private handleRiskTeam(event: React.FormEvent<HTMLDivElement>, item: IDropdownOp
 
 }
 
+private handleHREmployeeStatus(event: React.FormEvent<HTMLDivElement>, item: IDropdownOption): void {
+
+    
+  this.setState({ HREmployeeStatus:item.key });
+
+}
+
+private handleHRReview(event: React.FormEvent<HTMLDivElement>, item: IDropdownOption): void {
+
+    
+  this.setState({ HRReview:item.key });
+
+}
+
+private handleFoolowupActions(event: React.FormEvent<HTMLDivElement>, item: IDropdownOption): void {
+
+    
+  this.setState({ FollowupActions:item.key });
+
+}
+
 private handleQunattaitveRisk(event: React.FormEvent<HTMLDivElement>, item: IDropdownOption): void {
 
     
-  this.setState({ RiskTeam:item.key });
+  this.setState({ QuantativeRisk:item.key });
 
 }
 
 private handleQualitaveeRisk(event: React.FormEvent<HTMLDivElement>, item: IDropdownOption): void {
 
     
-  this.setState({ RiskTeam:item.key });
+  this.setState({ QualitativeRisk:item.key });
 
 }
 
@@ -280,6 +371,33 @@ private async _getPeoplePickerItems(items: any[]) {
     this.setState({ReviewerNameId:info});
     console.log(userInfo)
     console.log(ReviewerName)
+    
+});
+
+  }
+
+  else
+  {
+
+    this.setState({ReviewerNameId:null});
+  }
+
+
+
+}
+
+private async _getPeoplePickerItems1(items: any[]) {
+  console.log('Items:', items);
+
+  if(items.length>0)
+  {
+
+    HRSign = items[0].text;
+
+    let userInfo = this._service.getUserByLogin(items[0].loginName).then((info:any)=>{
+    this.setState({HRSignId:info});
+    console.log(userInfo)
+    console.log(HRSign)
     
 });
 
@@ -351,6 +469,157 @@ private changeFileupload(data: any) {
   
   
   }
+
+
+  private OnRiskTeamBtnClick():void{
+
+   if(this.state.RiskTeam==''||this.state.RiskTeam==null)
+   {
+
+    alert('Please Select Risk Team')
+
+
+  }
+
+  else if(this.state.ReviewerNameId=='')
+  {
+
+    alert('Please Select RiskTeamReviewer')
+  }
+
+  else if(this.state.QualitativeRisk==''||this.state.QualitativeRisk==null)
+  {
+
+    alert('Please Select Qualitative Risk Value')
+  }
+
+  else if(this.state.QuantativeRisk==''||this.state.QuantativeRisk==null)
+  {
+
+    alert('Please Select Quantative Risk Value')
+  }
+
+  
+  else if(this.state.hrrequired==null || this.state.hrrequired=='')
+  {
+
+    alert('Please Select COI Require future review by HR')
+  }
+
+  else if(this.state.FileValue.length==0)
+  {
+
+    alert('Please Select file to upload')
+  }
+
+
+  else
+  {
+
+
+    let myfiles=[];
+
+    for(var count=0;count<this.state.FileValue.length;count++)
+    {
+      
+      myfiles.push(this.state.FileValue[count]);
+    }
+
+   
+    this._service.updateReviewrDetails(
+      
+    itemId,
+    this.state.RiskTeam,
+    (this.state.ReviewerNameId == null ? 0:this.state.ReviewerNameId.Id),
+    this.state.QualitativeRisk,
+    this.state.QuantativeRisk,
+    this.state.ReviewerComments,
+    this.state.hrrequired,
+    myfiles
+
+    ).then(function (data:any)
+    {
+  
+      alert('Record updated successfully');
+  
+ 
+  
+    });
+    
+  }
+
+  }
+
+  private OnHRBtnClick():void{
+
+  if(this.state.HREmployeeStatus=='' ||this.state.HREmployeeStatus==null)
+  {
+    alert('Please Select Employee Status')
+  }
+
+  else if(this.state.HRReview=='' || this.state.HRReview==null)
+  {
+    alert('Please Select HR Review')
+
+  }
+
+  else if(this.state.FollowupActions=='' || this.state.FollowupActions==null)
+  {
+    alert('Please Select FallowUpActions')
+
+  }
+
+   
+
+ 
+   }
+
+  public async getReviewersGrouporNot() {
+    let mycurgroup= await this._service.getCurrentUserSiteGroups();
+     console.log(mycurgroup.length);
+     for (let grpcount = 0; grpcount < mycurgroup.length; grpcount++) {
+  
+      if(mycurgroup[grpcount].Title=='RiskReviewers')
+      {
+  
+        this.setState({ RiskReviewverExsits: true });
+
+        
+       
+  
+      }
+
+    }
+  }
+
+  public async getHRGrouporNot() {
+    let mycurgroup= await this._service.getCurrentUserSiteGroups();
+     console.log(mycurgroup.length);
+     for (let grpcount = 0; grpcount < mycurgroup.length; grpcount++) {
+  
+      if(mycurgroup[grpcount].Title=='HRGroup')
+      {
+  
+        this.setState({ HRExsits: true });
+
+      }
+
+    }
+  }
+
+  private ChangeMitigatecomments(data: any): void {
+
+    this.setState({ MitigateComments: data.target.value });
+  
+  }
+
+  private ChangeFollowUpcomments(data: any): void {
+
+    this.setState({ FollowupComments: data.target.value });
+  
+  }
+  
+
 
 
   public render(): React.ReactElement<IConflictRegistryDetailsProps> {
@@ -455,6 +724,9 @@ private changeFileupload(data: any) {
 
 </div>
 
+{this.state.RiskTeamStatus == 'Pending' && this.state.RiskReviewverExsits==true &&
+
+<div> 
 <div className={styles.Divsection}>  
 
 <b><label className={styles.HeadLable}>Enterprise Risk Review</label></b><br></br>
@@ -462,7 +734,7 @@ private changeFileupload(data: any) {
 </div>
 
 <div className={styles.Divsection}> 
-<b><label className={styles.labelsFonts}>Dose COI require future review by HR ?<label className={styles.recolorss}>*</label></label></b><br/><br/> 
+<b><label className={styles.labelsFonts}>Risk Team Review<label className={styles.recolorss}>*</label></label></b><br/><br/> 
 <Dropdown className={styles.onlyFont}
   placeholder="Select Risk Team"
   options={drpRiskTeamReview}
@@ -505,7 +777,7 @@ private changeFileupload(data: any) {
 
 <div className={styles.Divsection}>  
 
-<b><label className={styles.labelsFonts}>Quantative Risk</label></b><br></br>
+<b><label className={styles.labelsFonts}>Qualitative Risk<label className={styles.recolorss}>*</label></label></b><br></br>
 
 </div>
 
@@ -516,6 +788,12 @@ private changeFileupload(data: any) {
   options={drpQualitative}
   styles={dropdownStyles}
   selectedKey={this.state.QualitativeRisk ? this.state.QualitativeRisk : undefined} onChange={this.handleQualitaveeRisk.bind(this)}/><br></br>
+
+</div>
+
+<div className={styles.Divsection}>  
+
+<b><label className={styles.labelsFonts}>Quantative Risk<label className={styles.recolorss}>*</label></label></b><br></br>
 
 </div>
 
@@ -540,7 +818,7 @@ private changeFileupload(data: any) {
 </div>
 
 <div className={styles.Divsection}> 
-<b><label className={styles.labelsFonts}>Do you wish to register any outside of work employment or activities outlined within the acknowledgement above that you are involved in? <label className={styles.recolorss}>*</label></label></b><br/><br/> 
+<b><label className={styles.labelsFonts}>Does COI Require future review by HR ? <label className={styles.recolorss}>*</label></label></b><br/><br/> 
 <Dropdown className={styles.onlyFont}
   placeholder="Select  Yes or NO"
   options={COIdrpYesorNo}
@@ -550,7 +828,7 @@ private changeFileupload(data: any) {
 
 <div className={styles.Divsection}>
 
-<b><label className={styles.labelsFonts}>COI Eveidence</label></b><br/>
+<b><label className={styles.labelsFonts}>COI Eveidence<label className={styles.recolorss}>*</label></label></b><br/>
              <div> 
   
             <input id="infringementFiles" type="file"  name="files[]"  onChange={this.changeFileupload.bind(this)} disabled={this.state.disableFileUpload}/>
@@ -572,8 +850,140 @@ private changeFileupload(data: any) {
 
 </div>
 
+<div className={styles.Divsection}> 
+
+<PrimaryButton text="Update" onClick={this.OnRiskTeamBtnClick.bind(this)} styles={stackButtonStyles} className={styles.welcomeImage} disabled={this.state.RiskReviewverExsits == true?false :true }/><br></br>
+
 </div>
 
+</div>
+
+}
+
+{this.state.RiskTeamStatus == 'Approved' &&
+
+<div> 
+<div className={styles.Divsection}>  
+
+<b><label className={styles.HeadLable}>Enterprise Risk Review</label></b><br></br>
+
+</div>
+
+<b><label className={styles.labelsFonts}>Risk Team Review</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.RiskTeam == null ? 'N/A' : this.state.RiskTeam}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Risk Team Reviewer</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.RiskReviewervalue == null ? 'N/A' : this.state.RiskReviewervalue}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Quantative Risk</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.QuantativeRisk == null ? 'N/A' : this.state.QuantativeRisk}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Qualitative Risk</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.QualitativeRisk == null ? 'N/A' : this.state.QualitativeRisk}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Comments</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.ReviewerComments == null ? 'N/A' : this.state.ReviewerComments}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Does COI Require future review by HR ?</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.hrrequired == null ? 'N/A' : this.state.hrrequired}</label><br/><br/>
+<b><label className={styles.labelsFonts}>COI Evidence</label></b><br/><br/>
+{this.state.AttachmentFiles.length>0 && this.state.AttachmentFiles.map((item:any,index:any) =>( 
+    <div><a href={item.ServerRelativeUrl} target="_blank">{item.FileName} </a></div>
+   ))}
+
+
+</div>
+
+}
+
+{this.state.RiskTeamStatus == 'Approved' && this.state.HRExsits==true && this.state.HRApprovalStatus=='Pending' &&
+
+<div> 
+<div className={styles.Divsection}>  
+
+<b><label className={styles.HeadLable}>HR Review</label></b><br></br>
+
+</div>
+
+<div className={styles.Divsection}>  
+
+<b><label className={styles.labelsFonts}>Details</label></b><br></br>
+
+</div>
+<div className={styles.Divsection}>  
+
+<b><label className={styles.labelsFonts}>Employment Status<label className={styles.recolorss}>*</label></label></b><br/><br/>
+<Dropdown className={styles.onlyFont}
+  placeholder="Select Employee Status"
+  options={drpHrEmployeeStatus}
+  styles={HrdropdownStyles}
+  selectedKey={this.state.HREmployeeStatus ? this.state.HREmployeeStatus : undefined} onChange={this.handleHREmployeeStatus.bind(this)}/><br></br>
+
+<b><label className={styles.labelsFonts}>HR Review<label className={styles.recolorss}>*</label></label></b><br/><br/>
+<Dropdown className={styles.onlyFont}
+  placeholder="Select HR Review"
+  options={drpHrReview}
+  styles={HrdropdownStyles}
+  selectedKey={this.state.HRReview ? this.state.HRReview : undefined} onChange={this.handleHRReview.bind(this)}/><br></br>
+ </div>
+
+ <div className={styles.myBackcolorTest}>  
+              <PeoplePicker 
+                  context={this.props.context}
+                  //titleText="User Name"
+                  personSelectionLimit={1}
+                  showtooltip={true}
+                  required={true}
+                  disabled={false}
+                  onChange={this._getPeoplePickerItems1.bind(this)}
+                  showHiddenInUI={false}
+                  principalTypes={[PrincipalType.User]}
+                  defaultSelectedUsers={(this.state.HRSignId && this.state.HRSignId.length) ? [this.state.HRSignId] : []}
+                  ref={c => (this.ppl = c)} 
+                  resolveDelay={1000} />  
+
+<br></br>
+
+</div>
+
+<br></br>
+
+{this.state.HRReview == 'Mitigate' &&
+<div>
+<div className={styles.Divsection}> 
+<b><label className={styles.labelsFonts}>Mitigate Comments</label></b><br></br>
+</div>
+<div className={styles.Divsection}> 
+<textarea id="txtmitigatecomments" value={this.state.MitigateComments} onChange={this.ChangeMitigatecomments.bind(this)} className={styles.blockcolor}></textarea>
+</div>
+</div>
+
+}
+
+<div className={styles.Divsection}> 
+
+<b><label className={styles.labelsFonts}>FollowUp-Actions<label className={styles.recolorss}>*</label></label></b><br/><br/>
+<Dropdown className={styles.onlyFont}
+  placeholder="Select FollowUp-Actions"
+  options={drpFollowupActions}
+  styles={HrdropdownStyles}
+  selectedKey={this.state.FollowupActions ? this.state.FollowupActions : undefined} onChange={this.handleFoolowupActions.bind(this)}/><br></br>
+</div>
+
+{this.state.FollowupActions == 'Yes' &&
+<div>
+<div className={styles.Divsection}> 
+<b><label className={styles.labelsFonts}>FollwUp Comments</label></b><br></br>
+
+</div>
+<div className={styles.Divsection}> 
+<textarea id="txtFollowupComments" value={this.state.FollowupComments} onChange={this.ChangeFollowUpcomments.bind(this)} className={styles.blockcolor}></textarea>
+</div>
+</div>
+}
+
+<PrimaryButton text="Approve" onClick={this.OnHRBtnClick.bind(this)} styles={stackButtonStyles} className={styles.welcomeImage}/><br></br>
+
+</div>
+
+}
+
+</div>
 
 </Stack>
     );

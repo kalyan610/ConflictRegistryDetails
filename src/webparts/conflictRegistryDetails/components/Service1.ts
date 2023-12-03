@@ -28,47 +28,14 @@ export default class Service {
     }
 
 
+    public test()
+    {
+
+       this.updateReviewrDetails(2,'','','','','','','');
+    }
 
 
-    // public async GetAllBussinessUnits():Promise<any>
-    // {
- 
-    //  return await sp.web.lists.getByTitle("BusinessUnits").items.select('Title','ID').expand().get().then(function (data:any) {
- 
-    //  return data;
- 
- 
-    //  });
- 
- 
-    // }
-
-    // public async GetAllgiftregistries():Promise<any>
-    // {
- 
-    //  return await sp.web.lists.getByTitle("GiftRegistry").items.select('Title','ID','RequestType').expand().get().then(function (data:any) {
- 
-    //  return data;
- 
- 
-    //  });
- 
- 
-    // }
-
-    // public async GetAllCurrencies():Promise<any>
-    // {
- 
-    //  return await sp.web.lists.getByTitle("Currency").items.select('Title','ID').expand().get().then(function (data:any) {
- 
-    //  return data;
- 
- 
-    //  });
- 
- 
-    // }
-  
+    
   
     public async getUserByLogin(LoginName:string):Promise<any>{
         try{
@@ -97,11 +64,80 @@ export default class Service {
         try {
 
     const selectedList = 'ConflictRegistrySubmissions';
-    const Item: any[] = await sp.web.lists.getByTitle(selectedList).items.select("*").filter("ID eq '" + ItemID + "'").get();
+    const Item: any[] = await sp.web.lists.getByTitle(selectedList).items.select("*,Attachments,AttachmentFiles,RiskTeamReviewer/EMail").expand("AttachmentFiles,RiskTeamReviewer").filter("ID eq '" + ItemID + "'").get();
             return Item[0];
         } catch (error) {
             console.log(error);
         }
+    }
+
+
+    private async updateReviewrDetails(
+
+        MyRecordId:number,
+        RiskTeamValue:string,
+        MyReviwerId:string,
+        MyQualitavieRisk:string,
+        MyQunatativeRisk:string,
+        MyReviewerComments:string,
+        MyDoesItRequiresHRApproval:string,
+        MyAttachmanets:any
+        
+        )
+    {
+
+        let file=MyAttachmanets;
+
+       let MyListTitle='ConflictRegistrySubmissions';
+
+       let Myval='Completed';
+
+        try
+        {
+    
+        let list = sp.web.lists.getByTitle(MyListTitle);
+        let Varmyval = await list.items.getById(MyRecordId).update({
+
+        //Emp Update
+        
+        Title:"Updated by Reviewer",
+        RiskTeamReview :RiskTeamValue,
+        RiskTeamReviewerId:MyReviwerId,
+        QualitativeRisk:MyQualitavieRisk,
+        QuantativeRisk:MyQunatativeRisk,
+        ReviewerComments:MyReviewerComments,
+        DoesItRequiresHRApproval:MyDoesItRequiresHRApproval,
+        ReviewerStatus:'Approved'
+         
+        
+    }).then (async r => {
+        // this will add an attachment to the item we just created to push t sharepoint list
+  
+      for(var count=0;count<file.length;count++)
+      {
+       await r.item.attachmentFiles.add(file[count].name, file[count]).then(result => {
+      console.log(result);
+  
+        })
+  
+      }
+  
+      return Myval;
+  
+  
+  
+      })
+  
+        return Varmyval;
+
+        }
+
+    
+      catch (error) {
+        console.log(error);
+      }
+      
+
     }
 
    
