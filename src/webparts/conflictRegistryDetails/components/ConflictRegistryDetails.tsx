@@ -21,9 +21,9 @@ const stackButtonStyles: Partial<IStackStyles> = { root: { width: 10 } };
 const stackStyles: Partial<IStackStyles> = { root: { padding: 10} };
 const COIdrpYesorNo:IDropdownOption[]=[  { key: "Yes", text: "Yes"},  { key: "No", text: "No" }];  
 
-const drpQunativeRisk:IDropdownOption[]=[  { key: "Yes", text: "Yes"},  { key: "No", text: "No" }];  
+const drpQunativeRisk:IDropdownOption[]=[  { key: "Low", text: "Low"},  { key: "Medium", text: "Medium" },{ key: "High", text: "High" }];  
 
-const drpQualitative:IDropdownOption[]=[  { key: "Yes", text: "Yes"},  { key: "No", text: "No" }];  
+const drpQualitative:IDropdownOption[]=[  { key: "Low", text: "Low"},  { key: "Medium", text: "Medium" },{ key: "High", text: "High" }];  
 
 const drpRiskTeamReview:IDropdownOption[]=[  { key: "Accept", text: "Accept"},  { key: "Mitigate", text: "Mitigate" },{ key: "Not a Conflict", text: "Not a Conflict" },{ key: "Reject", text: "Reject" } ];  
 
@@ -48,7 +48,7 @@ let HRSign='';
 
 let itemId='';
 
-
+let Envval='';
 
 export interface IConflictRegistrationDetails
 {
@@ -109,7 +109,9 @@ export interface IConflictRegistrationDetails
   FollowupComments:any;
   HRSignId:any;
   //End
-
+  
+  MyRecordId:any;
+  MyBussinessValuetext:any;
 }
 
 
@@ -191,7 +193,9 @@ export default class ConflictRegistryDetails extends React.Component<IConflictRe
       MitigateComments:"",
       FollowupActions:"",
       FollowupComments:"",
-      HRSignId:[]
+      HRSignId:[],
+      MyRecordId:"",
+      MyBussinessValuetext:""
 
 
     };
@@ -204,6 +208,8 @@ export default class ConflictRegistryDetails extends React.Component<IConflictRe
     itemId = this.getParam('SID');
 
     this.GetData();
+
+    this.GetEnvironment();
    
   }
 
@@ -245,8 +251,7 @@ public async GetMyRecords()
 
   this.setState({ MyListItems: ItemInfo1 });
 
-  this.setState({Bussinessunitval:ItemInfo1.BussinessUnitId});
-
+ 
   this.setState({ MyName: ItemInfo1.Name });
 
   this.setState({DoyowanttoRegisterWorkEmployment:ItemInfo1.DoYouwishtoRegister});
@@ -259,7 +264,7 @@ public async GetMyRecords()
 
   this.setState({DetailsWorkEmployment:ItemInfo1.DetailsWorkEmployment});
 
-
+  this.setState({MyBussinessValuetext:ItemInfo1.BussinessValue});
   this.setState({PaidorUnpaidWorkEmployment:ItemInfo1.PaidorUnpaid});
 
   this.setState({ActiveorDormamantCompanyWorkEmployment:ItemInfo1.ActiveorDormamantCompany});
@@ -286,11 +291,18 @@ public async GetMyRecords()
   this.setState({ConflictYesNo:ItemInfo1.ConflictofIntrest});
   this.setState({ConflictDetails:ItemInfo1.DetailsofConflict});
 
+  this.setState({HRApprovalStatus:ItemInfo1.HRStatus});
+  this.setState({RiskTeamStatus:ItemInfo1.ReviewerStatus});
+
   //End
 
   //Riskteam
 
-  this.setState({RiskTeamStatus:ItemInfo1.ReviewerStatus});
+  if(ItemInfo1.ReviewerStatus=='Approved')
+
+  {
+
+  
   this.setState({RiskTeam:ItemInfo1.RiskTeamReview});
   //ReviewPending
   this.setState({QualitativeRisk:ItemInfo1.QualitativeRisk});
@@ -299,13 +311,28 @@ public async GetMyRecords()
   this.setState({hrrequired:ItemInfo1.DoesItRequiresHRApproval});
   this.setState({AttachmentFiles:ItemInfo1.AttachmentFiles});
   this.setState({RiskReviewervalue:ItemInfo1.RiskTeamReviewer.EMail});
+  
 
-
+  }
   //END
 
   //HR
 
-  this.setState({HRApprovalStatus:ItemInfo1.HRStatus});
+  
+
+  if(ItemInfo1.HRStatus=='Approved' && ItemInfo1.ReviewerStatus=='Approved')
+
+  {
+    this.setState({RiskReviewervalue:ItemInfo1.RiskTeamReviewer.EMail});
+    this.setState({HREmployeeStatus:ItemInfo1.EmploymentStatus});
+    this.setState({HRReview:ItemInfo1.HRReview});
+    this.setState({MitigateComments:ItemInfo1.MitigationComments});
+    this.setState({FollowupActions:ItemInfo1.FollowUpActions});
+    this.setState({FollowupComments:ItemInfo1.FollowUpComments});
+    this.setState({HRSignId:ItemInfo1.HRSign.EMail});
+    
+  }
+
   //END
 
 }
@@ -539,8 +566,12 @@ private changeFileupload(data: any) {
 
     ).then(function (data:any)
     {
+
+      
   
       alert('Record updated successfully');
+
+      window.location.replace(Envval);
   
  
   
@@ -567,6 +598,34 @@ private changeFileupload(data: any) {
   {
     alert('Please Select FallowUpActions')
 
+  }
+
+  else
+  {
+
+    this._service.updateHRDetails(
+      
+itemId,
+this.state.HREmployeeStatus,
+this.state.HRReview,
+this.state.MitigateComments,
+this.state.FollowupActions,
+this.state.FollowupComments,
+(this.state.HRSignId == null ? 0:this.state.HRSignId.Id)
+  
+      
+  
+      ).then(function (data:any)
+      {
+         
+
+        alert('Record updated successfully');
+
+        window.location.replace(Envval);
+    
+   
+    
+      });
   }
 
    
@@ -618,6 +677,28 @@ private changeFileupload(data: any) {
     this.setState({ FollowupComments: data.target.value });
   
   }
+
+  public async GetEnvironment()
+  {
+
+    var data = await this._service.getEnvironment();
+
+    console.log(data);
+
+    var AllEnvironments: any = [];
+
+    for (var k in data) {
+
+      AllEnvironments.push({ key: data[k].ID, text: data[k].Title});
+
+      Envval=data[0].Title;
+
+      
+    }
+
+   
+  }
+
   
 
 
@@ -631,9 +712,15 @@ private changeFileupload(data: any) {
 
 <div>  
 
+<div className={styles.Divsection}> 
+
+<b><label className={styles.HeadLable}>COI ID: {itemId} </label></b><br></br><br></br>
+
+</div>
+
 <div className={styles.Divsection}>  
 
-<b><label className={styles.HeadLable}>Contact Information</label></b><br></br>
+<b><label className={styles.HeadLable}>Contact Information</label></b><br></br><br></br>
 
 </div>
 
@@ -642,15 +729,17 @@ private changeFileupload(data: any) {
 <label className={styles.ValueFonts}>{this.state.MyName == null ? 'N/A' : this.state.MyName}</label><br/><br/>
 
 <b><label className={styles.labelsFonts}>Bussiness Unit</label></b><br/><br/>  
-<label className={styles.ValueFonts}>{this.state.Bussinessunitval==null ? 'N/A' :this.state.Bussinessunitval}</label><br/><br/>
+<label className={styles.ValueFonts}>{this.state.MyBussinessValuetext==null ? 'N/A' :this.state.MyBussinessValuetext}</label><br/><br/>
 
 </div>
 
 <div className={styles.Divsection}>  
 
-<b><label className={styles.HeadLable}>Work Employment / Activities</label></b><br></br>
+<b><label className={styles.HeadLable}>Work Employment / Activities</label></b><br></br><br></br>
 
 </div>
+
+
 
 <div className={styles.Divsection}>  
 <b><label className={styles.labelsFonts}>Risk Team Review </label></b><br/><br/>
@@ -679,17 +768,22 @@ private changeFileupload(data: any) {
 <b><label className={styles.labelsFonts}>As a Board of Director, are you on a Board with a Capco client or an employee of a Capco client?</label></b><br/><br/>  
 <label className={styles.ValueFonts}>{this.state.OBoardCapcoClientWorkEmployment == null ? 'N/A' : this.state.OBoardCapcoClientWorkEmployment}</label><br/><br/>
 
-<div className={styles.Divsection}>  
-<b><label className={styles.HeadLable}>Share Ownership</label></b><br></br>
+
 </div>
-<br></br>
-<div>
-<b><label className={styles.labelsFonts}>Do you maintain ownership of a company stock greater than 5%? </label></b><br/><br/>
-<label className={styles.ValueFonts}>{this.state.StockRange == null ? 'N/A' : this.state.StockRange}</label><br/><br/>
-</div></div>
 
 <div className={styles.Divsection}>  
-<b><label className={styles.HeadLable}>Insider Trading List Identification</label></b><br></br>
+<b><label className={styles.HeadLable}>Share Ownership</label></b><br></br><br></br>
+</div>
+
+<div className={styles.Divsection}>
+<b><label className={styles.labelsFonts}>Do you maintain ownership of a company stock greater than 5%? </label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.StockRange == null ? 'N/A' : this.state.StockRange}</label><br/><br/>
+</div> 
+
+
+
+<div className={styles.Divsection}>  
+<b><label className={styles.HeadLable}>Insider Trading List Identification</label></b><br></br><br></br>
 
 </div>
 
@@ -713,7 +807,7 @@ private changeFileupload(data: any) {
 
 <div className={styles.Divsection}>  
 
-<b><label className={styles.HeadLable}>Other Conflicts</label></b><br></br>
+<b><label className={styles.HeadLable}>Other Conflicts</label></b><br></br><br></br>
 </div>
 
 <div className={styles.Divsection}>  
@@ -729,7 +823,7 @@ private changeFileupload(data: any) {
 <div> 
 <div className={styles.Divsection}>  
 
-<b><label className={styles.HeadLable}>Enterprise Risk Review</label></b><br></br>
+<b><label className={styles.HeadLable}>Enterprise Risk Review</label></b><br></br><br></br>
 
 </div>
 
@@ -741,8 +835,8 @@ private changeFileupload(data: any) {
   styles={dropdownStyles}
   selectedKey={this.state.RiskTeam ? this.state.RiskTeam : undefined} onChange={this.handleRiskTeam.bind(this)}/><br></br>
 
-
-<div className={styles.myBackcolorTest}>  
+<b><label className={styles.labelsFonts}>Reviewer Sign<label className={styles.recolorss}>*</label></label></b><br/><br/> 
+<div className={styles.myBackcolorTest1}>  
               <PeoplePicker 
                   context={this.props.context}
                   //titleText="User Name"
@@ -771,8 +865,11 @@ private changeFileupload(data: any) {
 
 <div className={styles.Divsection}>  
 
-<p className={styles.labelsFonts}>Qualitatively:</p><br></br>
-<p className={styles.labelsFonts}>Quantitatively:</p>
+<p className={styles.labelsFonts}>Qualitatively:Would be reasonable to believe the private interests could influence Employee X's Perfomance of their job duites(for example,close affllations with people or organizations, or
+personal assets or Investments,etc.);</p><br></br>
+<p className={styles.labelsFonts}>Quantitatively:
+Would be reasonable to believe the private interests could influence Employee X's Perfomance of their job duites(for example,a significant family business intrest,opprtunity to make a large
+financial profit or avoid a large loss,etc).</p>
 </div>
 
 <div className={styles.Divsection}>  
@@ -865,13 +962,15 @@ private changeFileupload(data: any) {
 <div> 
 <div className={styles.Divsection}>  
 
-<b><label className={styles.HeadLable}>Enterprise Risk Review</label></b><br></br>
+<b><label className={styles.HeadLable}>Enterprise Risk Review</label></b><br></br><br></br>
 
 </div>
 
+<div className={styles.Divsection}> 
+
 <b><label className={styles.labelsFonts}>Risk Team Review</label></b><br/><br/>
 <label className={styles.ValueFonts}>{this.state.RiskTeam == null ? 'N/A' : this.state.RiskTeam}</label><br/><br/>
-<b><label className={styles.labelsFonts}>Risk Team Reviewer</label></b><br/><br/>
+<b><label className={styles.labelsFonts}>Risk Signature</label></b><br/><br/>
 <label className={styles.ValueFonts}>{this.state.RiskReviewervalue == null ? 'N/A' : this.state.RiskReviewervalue}</label><br/><br/>
 <b><label className={styles.labelsFonts}>Quantative Risk</label></b><br/><br/>
 <label className={styles.ValueFonts}>{this.state.QuantativeRisk == null ? 'N/A' : this.state.QuantativeRisk}</label><br/><br/>
@@ -888,6 +987,7 @@ private changeFileupload(data: any) {
 
 
 </div>
+</div>
 
 }
 
@@ -896,7 +996,7 @@ private changeFileupload(data: any) {
 <div> 
 <div className={styles.Divsection}>  
 
-<b><label className={styles.HeadLable}>HR Review</label></b><br></br>
+<b><label className={styles.HeadLable}>HR Review</label></b><br></br><br></br>
 
 </div>
 
@@ -922,6 +1022,7 @@ private changeFileupload(data: any) {
   selectedKey={this.state.HRReview ? this.state.HRReview : undefined} onChange={this.handleHRReview.bind(this)}/><br></br>
  </div>
 
+<b><label className={styles.labelsFonts1}>HR Signature<label className={styles.recolorss}>*</label></label></b><br/><br/>
  <div className={styles.myBackcolorTest}>  
               <PeoplePicker 
                   context={this.props.context}
@@ -957,7 +1058,7 @@ private changeFileupload(data: any) {
 
 <div className={styles.Divsection}> 
 
-<b><label className={styles.labelsFonts}>FollowUp-Actions<label className={styles.recolorss}>*</label></label></b><br/><br/>
+<b><label className={styles.labelsFonts}>Follow-up Actions<label className={styles.recolorss}>*</label></label></b><br/><br/>
 <Dropdown className={styles.onlyFont}
   placeholder="Select FollowUp-Actions"
   options={drpFollowupActions}
@@ -968,7 +1069,7 @@ private changeFileupload(data: any) {
 {this.state.FollowupActions == 'Yes' &&
 <div>
 <div className={styles.Divsection}> 
-<b><label className={styles.labelsFonts}>FollwUp Comments</label></b><br></br>
+<b><label className={styles.labelsFonts}>Follow-up Comments</label></b><br></br>
 
 </div>
 <div className={styles.Divsection}> 
@@ -981,6 +1082,162 @@ private changeFileupload(data: any) {
 
 </div>
 
+}
+
+{this.state.RiskTeamStatus == 'Approved' && this.state.HRApprovalStatus=='Approved' &&
+
+
+<div>  
+
+{/* <div className={styles.Divsection}>  
+
+<b><label className={styles.HeadLable}>Contact Information</label></b><br></br><br></br>
+
+</div>
+
+<br></br>
+
+<div className={styles.Divsection}>  
+<b><label className={styles.labelsFonts}>Name</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.MyName == null ? 'N/A' : this.state.MyName}</label><br/><br/>
+
+<b><label className={styles.labelsFonts}>Bussiness Unit</label></b><br/><br/>  
+<label className={styles.ValueFonts}>{this.state.Bussinessunitval==null ? 'N/A' :this.state.Bussinessunitval}</label><br/><br/>
+
+</div>
+
+<div className={styles.Divsection}>  
+
+<b><label className={styles.HeadLable}>Work Employment / Activities</label></b><br></br><br></br>
+
+</div>
+
+
+<div className={styles.Divsection}>  
+<b><label className={styles.labelsFonts}>Risk Team Review </label></b><br/><br/>
+<label className={styles.ValueFonts}> {this.state.DoyowanttoRegisterWorkEmployment == null ? 'N/A' : this.state.DoyowanttoRegisterWorkEmployment}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Company Name</label></b><br/><br/>  
+<label className={styles.ValueFonts}>{this.state.CompanyNameWorkEmployment == null ? 'N/A' : this.state.CompanyNameWorkEmployment}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Type of Company / Registration Number</label></b><br/><br/>  
+<label className={styles.ValueFonts}>{this.state.TypeofcompanyorRegnumberWorkEmployment == null ? 'N/A' : this.state.TypeofcompanyorRegnumberWorkEmployment}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Position</label></b><br/><br/>  
+<label className={styles.ValueFonts}>{this.state.PositionWorkEmployment == null ? 'N/A' : this.state.PositionWorkEmployment}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Details</label></b><br/><br/>  
+<label className={styles.ValueFonts}>{this.state.DetailsWorkEmployment == null ? 'N/A' : this.state.DetailsWorkEmployment}</label><br/><br/>
+
+<b><label className={styles.labelsFonts}>Paid / Unpaid / Voluntary</label></b><br/><br/>  
+<label className={styles.ValueFonts}> {this.state.PaidorUnpaidWorkEmployment == null ? 'N/A' : this.state.PaidorUnpaidWorkEmployment}</label><br/><br/>
+
+<b><label className={styles.labelsFonts}>Is this an active or dormant company?</label></b><br/><br/>  
+<label className={styles.ValueFonts}>{this.state.ActiveorDormamantCompanyWorkEmployment == null ? 'N/A' : this.state.ActiveorDormamantCompanyWorkEmployment}</label><br/><br/>
+
+<b><label className={styles.labelsFonts}>Is the company involved in financial services included but not limited to: banking, hedge funds, real estate, private equity or financial technology?</label></b><br/><br/>  
+<label className={styles.ValueFonts}>{this.state.CompanyInvolvedFinancialServicesWorkEmployment == null ? 'N/A' : this.state.CompanyInvolvedFinancialServicesWorkEmployment}</label><br/><br/>
+
+<b><label className={styles.labelsFonts}>Do you sit on the Board of Directors?</label></b><br/><br/>  
+<label className={styles.ValueFonts}>{this.state.SitonBoardoFDirectorsWorkEmployment == null ? 'N/A' : this.state.SitonBoardoFDirectorsWorkEmployment}</label><br/><br/>
+
+<b><label className={styles.labelsFonts}>As a Board of Director, are you on a Board with a Capco client or an employee of a Capco client?</label></b><br/><br/>  
+<label className={styles.ValueFonts}>{this.state.OBoardCapcoClientWorkEmployment == null ? 'N/A' : this.state.OBoardCapcoClientWorkEmployment}</label><br/><br/>
+
+</div>
+
+<div className={styles.Divsection}>  
+<b><label className={styles.HeadLable}>Share Ownership</label></b><br></br><br></br>
+</div>
+
+<div className={styles.Divsection}>
+<b><label className={styles.labelsFonts}>Do you maintain ownership of a company stock greater than 5%? </label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.StockRange == null ? 'N/A' : this.state.StockRange}</label><br/><br/>
+</div>
+
+<div className={styles.Divsection}>  
+<b><label className={styles.HeadLable}>Insider Trading List Identification</label></b><br></br>
+
+</div>
+<br></br>
+
+<div className={styles.Divsection}>  
+<b><label className={styles.labelsFonts}>Have you been added as part of an insider's trader list? </label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.HaveyoubeenaddedInsiderInformation == null ? 'N/A' : this.state.HaveyoubeenaddedInsiderInformation}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Your Full Name</label></b><br/><br/>  
+<label className={styles.ValueFonts}>{this.state.YourFullNameInsiderInformation == null ? 'N/A' : this.state.YourFullNameInsiderInformation}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Insider Date</label></b><br/><br/>  
+<label className={styles.ValueFonts}>{this.state.InsiderDateInsiderInformation == null ? 'N/A' : this.state.InsiderDateInsiderInformation}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Client Name</label></b><br/><br/>  
+<label className={styles.ValueFonts}>{this.state.ClientNameInsiderInformation == null ? 'N/A' : this.state.ClientNameInsiderInformation}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Client project name or code phrase</label></b><br/><br/>  
+<label className={styles.ValueFonts}>{this.state.ClientProjectInsiderInformation == null ? 'N/A' : this.state.ClientProjectInsiderInformation}</label><br/><br/>
+<b><label className={styles.labelsFonts}>To whom was this escalated?</label></b><br/><br/>  
+<label className={styles.ValueFonts}>{this.state.WhomesclatedInsiderInformation == null ? 'N/A' : this.state.WhomesclatedInsiderInformation}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Anticipated date</label></b><br/><br/>  
+<label className={styles.ValueFonts}>{this.state.InsiderDateInsiderInformation == null ? 'N/A' : this.state.InsiderDateInsiderInformation}</label><br/><br/>
+</div>
+
+<div className={styles.Divsection}>  
+
+<b><label className={styles.HeadLable}>Other Conflicts</label></b><br></br><br></br>
+</div>
+
+<div className={styles.Divsection}>  
+<b><label className={styles.labelsFonts}>Are there any other conflicts of interest? </label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.ConflictYesNo == null ? 'N/A' : this.state.ConflictYesNo}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Details of Conflict </label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.ConflictDetails == null ? 'N/A' : this.state.ConflictDetails}</label><br/><br/>
+
+</div>
+
+<div className={styles.Divsection}>  
+
+<b><label className={styles.HeadLable}>Enterprise Risk Review</label></b><br></br><br></br>
+
+</div>
+
+<div className={styles.Divsection}>  
+
+<b><label className={styles.labelsFonts}>Risk Team Review</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.RiskTeam == null ? 'N/A' : this.state.RiskTeam}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Risk Signature</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.RiskReviewervalue == null ? 'N/A' : this.state.RiskReviewervalue}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Quantative Risk</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.QuantativeRisk == null ? 'N/A' : this.state.QuantativeRisk}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Qualitative Risk</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.QualitativeRisk == null ? 'N/A' : this.state.QualitativeRisk}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Comments</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.ReviewerComments == null ? 'N/A' : this.state.ReviewerComments}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Does COI Require future review by HR ?</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.hrrequired == null ? 'N/A' : this.state.hrrequired}</label><br/><br/>
+<b><label className={styles.labelsFonts}>COI Evidence</label></b><br/><br/>
+{this.state.AttachmentFiles.length>0 && this.state.AttachmentFiles.map((item:any,index:any) =>( 
+    <div><a href={item.ServerRelativeUrl} target="_blank">{item.FileName} </a></div>
+   ))}
+
+</div> */}
+
+<div className={styles.Divsection}>  
+
+<b><label className={styles.HeadLable}>HR Review</label></b><br></br><br></br>
+
+</div>
+
+<div className={styles.Divsection}> 
+
+<b><label className={styles.labelsFonts}>Employee Status</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.HREmployeeStatus == null ? 'N/A' : this.state.HREmployeeStatus}</label><br/><br/>
+<b><label className={styles.labelsFonts}>HRReview</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.HRReview == null ? 'N/A' : this.state.HRReview}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Mitigation Comments</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.MitigateComments == null ? 'N/A' : this.state.MitigateComments}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Follow-up Actions</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.FollowupActions == null ? 'N/A' : this.state.FollowupActions}</label><br/><br/>
+<b><label className={styles.labelsFonts}>Follow-up Comments</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.FollowupComments == null ? 'N/A' : this.state.FollowupComments}</label><br/><br/>
+<b><label className={styles.labelsFonts}>HR Signature</label></b><br/><br/>
+<label className={styles.ValueFonts}>{this.state.HRSignId == null ? 'N/A' : this.state.HRSignId}</label><br/><br/>
+</div>
+</div>
+
+  
 }
 
 </div>

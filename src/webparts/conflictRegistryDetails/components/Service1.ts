@@ -32,6 +32,7 @@ export default class Service {
     {
 
        this.updateReviewrDetails(2,'','','','','','','');
+       this.updateHRDetails(2,'','','','','','')
     }
 
 
@@ -64,7 +65,7 @@ export default class Service {
         try {
 
     const selectedList = 'ConflictRegistrySubmissions';
-    const Item: any[] = await sp.web.lists.getByTitle(selectedList).items.select("*,Attachments,AttachmentFiles,RiskTeamReviewer/EMail").expand("AttachmentFiles,RiskTeamReviewer").filter("ID eq '" + ItemID + "'").get();
+    const Item: any[] = await sp.web.lists.getByTitle(selectedList).items.select("*,Attachments,AttachmentFiles,RiskTeamReviewer/EMail,HRSign/EMail").expand("AttachmentFiles,RiskTeamReviewer,HRSign").filter("ID eq '" + ItemID + "'").get();
             return Item[0];
         } catch (error) {
             console.log(error);
@@ -84,6 +85,9 @@ export default class Service {
         MyAttachmanets:any
         
         )
+
+      
+
     {
 
         let file=MyAttachmanets;
@@ -92,8 +96,25 @@ export default class Service {
 
        let Myval='Completed';
 
+       let MyHRstatus='';
+
         try
         {
+
+
+        if(MyDoesItRequiresHRApproval=='Yes')
+        {
+
+
+            MyHRstatus='Pending'
+        }
+
+        else
+        {
+
+            MyHRstatus='Not Required'
+
+        }
     
         let list = sp.web.lists.getByTitle(MyListTitle);
         let Varmyval = await list.items.getById(MyRecordId).update({
@@ -107,7 +128,8 @@ export default class Service {
         QuantativeRisk:MyQunatativeRisk,
         ReviewerComments:MyReviewerComments,
         DoesItRequiresHRApproval:MyDoesItRequiresHRApproval,
-        ReviewerStatus:'Approved'
+        ReviewerStatus:'Approved',
+        HRStatus:MyHRstatus
          
         
     }).then (async r => {
@@ -140,9 +162,68 @@ export default class Service {
 
     }
 
-   
+    private async updateHRDetails(
+
+        MyRecordId:number,
+        MyHREmployeeStatus:string,
+        MyHRReview:string,
+       MyMitigateComments:string,
+        MyFallowupActions:String,
+        MyFallowUpComments:String,
+        HRSignValue:string
+        
+        
+        )
+    {
+
+       
+
+       let MyListTitle='ConflictRegistrySubmissions';
+
+       
+
+        try
+        {
+    
+        let list = sp.web.lists.getByTitle(MyListTitle);
+        let Varmyval = await list.items.getById(MyRecordId).update({
+
+        //Emp Update
+        
+        Title:"Approved by HR",
+        EmploymentStatus:MyHREmployeeStatus,
+        HRReview:MyHRReview,
+        MitigationComments:MyMitigateComments,
+        FollowUpActions:MyFallowupActions,
+        FollowUpComments:MyFallowUpComments,
+        HRSignId:HRSignValue,
+        HRStatus:"Approved"
+         
+        
+        });
+
+        return Varmyval;
+        }
 
    
+      catch (error) {
+        console.log(error);
+      }
+      
+      
+
+    }
+
+    public async getEnvironment():Promise<any>
+    {
     
+    return await sp.web.lists.getByTitle("Environment").items.select('Title','ID').expand().get().then(function (data:any) {
+     
+    return data;
+    
+    });
+   }     
+
+   
     
 }
