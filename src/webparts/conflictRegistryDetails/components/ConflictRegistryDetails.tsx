@@ -298,7 +298,7 @@ public async GetMyRecords()
 
   //Riskteam
 
-  if(ItemInfo1.ReviewerStatus=='Approved')
+  if(ItemInfo1.ReviewerStatus=='Completed')
 
   {
 
@@ -320,7 +320,7 @@ public async GetMyRecords()
 
   
 
-  if(ItemInfo1.HRStatus=='Approved' && ItemInfo1.ReviewerStatus=='Approved')
+  if(ItemInfo1.HRStatus=='Completed' && ItemInfo1.ReviewerStatus=='Completed')
 
   {
     this.setState({RiskReviewervalue:ItemInfo1.RiskTeamReviewer.EMail});
@@ -949,7 +949,7 @@ financial profit or avoid a large loss,etc).</p>
 
 <div className={styles.Divsection}> 
 
-<PrimaryButton text="Update" onClick={this.OnRiskTeamBtnClick.bind(this)} styles={stackButtonStyles} className={styles.welcomeImage} disabled={this.state.RiskReviewverExsits == true?false :true }/><br></br>
+<PrimaryButton text="Submit" onClick={this.OnRiskTeamBtnClick.bind(this)} styles={stackButtonStyles} className={styles.welcomeImage} disabled={this.state.RiskReviewverExsits == true?false :true }/><br></br>
 
 </div>
 
@@ -957,7 +957,7 @@ financial profit or avoid a large loss,etc).</p>
 
 }
 
-{this.state.RiskTeamStatus == 'Approved' &&
+{this.state.RiskTeamStatus == 'Completed' &&
 
 <div> 
 <div className={styles.Divsection}>  
@@ -991,7 +991,7 @@ financial profit or avoid a large loss,etc).</p>
 
 }
 
-{this.state.RiskTeamStatus == 'Approved' && this.state.HRExsits==true && this.state.HRApprovalStatus=='Pending' &&
+{this.state.RiskTeamStatus == 'Completed' && this.state.HRExsits==true && this.state.HRApprovalStatus=='Pending' &&
 
 <div> 
 <div className={styles.Divsection}>  
@@ -1078,13 +1078,13 @@ financial profit or avoid a large loss,etc).</p>
 </div>
 }
 
-<PrimaryButton text="Approve" onClick={this.OnHRBtnClick.bind(this)} styles={stackButtonStyles} className={styles.welcomeImage}/><br></br>
+<PrimaryButton text="Submit" onClick={this.OnHRBtnClick.bind(this)} styles={stackButtonStyles} className={styles.welcomeImage}/><br></br>
 
 </div>
 
 }
 
-{this.state.RiskTeamStatus == 'Approved' && this.state.HRApprovalStatus=='Approved' &&
+{this.state.RiskTeamStatus == 'Completed' && this.state.HRApprovalStatus=='Completed' &&
 
 
 <div>  

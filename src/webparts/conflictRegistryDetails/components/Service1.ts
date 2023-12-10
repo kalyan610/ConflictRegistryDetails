@@ -128,7 +128,7 @@ export default class Service {
         QuantativeRisk:MyQunatativeRisk,
         ReviewerComments:MyReviewerComments,
         DoesItRequiresHRApproval:MyDoesItRequiresHRApproval,
-        ReviewerStatus:'Approved',
+        ReviewerStatus:'Completed',
         HRStatus:MyHRstatus
          
         
@@ -190,14 +190,14 @@ export default class Service {
 
         //Emp Update
         
-        Title:"Approved by HR",
+        Title:"Completed by HR",
         EmploymentStatus:MyHREmployeeStatus,
         HRReview:MyHRReview,
         MitigationComments:MyMitigateComments,
         FollowUpActions:MyFallowupActions,
         FollowUpComments:MyFallowUpComments,
         HRSignId:HRSignValue,
-        HRStatus:"Approved"
+        HRStatus:"Completed"
          
         
         });
