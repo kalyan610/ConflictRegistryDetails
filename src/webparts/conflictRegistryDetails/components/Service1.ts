@@ -32,7 +32,7 @@ export default class Service {
     {
 
        this.updateReviewrDetails(2,'','','','','','','');
-       this.updateHRDetails(2,'','','','','','')
+       this.updateHRDetails(2,'','','','','','','')
     }
 
 
@@ -170,7 +170,8 @@ export default class Service {
        MyMitigateComments:string,
         MyFallowupActions:String,
         MyFallowUpComments:String,
-        HRSignValue:string
+        HRSignValue:string,
+        MyHRRequiredEmail:string
         
         
         )
@@ -197,6 +198,7 @@ export default class Service {
         FollowUpActions:MyFallowupActions,
         FollowUpComments:MyFallowUpComments,
         HRSignId:HRSignValue,
+        HRValue:MyHRRequiredEmail,
         HRStatus:"Completed"
          
         

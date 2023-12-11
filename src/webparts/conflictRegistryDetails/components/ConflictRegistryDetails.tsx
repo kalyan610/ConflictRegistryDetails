@@ -50,6 +50,8 @@ let itemId='';
 
 let Envval='';
 
+let HRRequiredEmail='';
+
 export interface IConflictRegistrationDetails
 {
   MyName:any;
@@ -421,6 +423,8 @@ private async _getPeoplePickerItems1(items: any[]) {
 
     HRSign = items[0].text;
 
+    HRRequiredEmail=items[0].secondaryText;
+
     let userInfo = this._service.getUserByLogin(items[0].loginName).then((info:any)=>{
     this.setState({HRSignId:info});
     console.log(userInfo)
@@ -611,7 +615,8 @@ this.state.HRReview,
 this.state.MitigateComments,
 this.state.FollowupActions,
 this.state.FollowupComments,
-(this.state.HRSignId == null ? 0:this.state.HRSignId.Id)
+(this.state.HRSignId == null ? 0:this.state.HRSignId.Id),
+HRRequiredEmail
   
       
   
@@ -711,6 +716,7 @@ this.state.FollowupComments,
 <Stack tokens={stackTokens} styles={stackStyles}>
 
 <div>  
+
 
 <div className={styles.Divsection}> 
 
@@ -1239,6 +1245,8 @@ financial profit or avoid a large loss,etc).</p>
 
   
 }
+
+
 
 </div>
 
